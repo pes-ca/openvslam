@@ -39,3 +39,9 @@ cmake-build-release/
 *.exe
 *.out
 *.app
+
+# Video
+video/
+
+# Script
+script/
