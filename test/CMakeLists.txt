@@ -39,7 +39,8 @@ foreach(SOURCE_PATH ${SOURCE_PATHS})
                           test_helper
                           gtest_main
                           opencv_imgcodecs
-                          opencv_highgui)
+                          opencv_highgui
+                          opencv_xfeatures2d)
     set_target_properties(${TEST_EXECUTABLE_NAME} PROPERTIES
                           RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/test
                           RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/test

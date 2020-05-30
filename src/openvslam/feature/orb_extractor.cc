@@ -41,6 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <opencv2/imgproc.hpp>
 #include <opencv2/features2d.hpp>
 
+#include <opencv2/xfeatures2d.hpp>
+#include <opencv2/xfeatures2d/cuda.hpp>
+#include <opencv2/xfeatures2d/nonfree.hpp>
+
 #ifdef USE_SSE_ORB
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -337,6 +341,13 @@ void orb_extractor::compute_fast_keypoints(std::vector<std::vector<cv::KeyPoint>
                 }
 
                 std::vector<cv::KeyPoint> keypts_in_cell;
+
+		cv::Ptr<cv::Feature2D> features = cv::xfeatures2d::SURF::create();
+		features->detect(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
+				 keypts_in_cell);
+				
+
+		/*
                 cv::FAST(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
                          keypts_in_cell, orb_params_.ini_fast_thr_, true);
 
@@ -345,6 +356,7 @@ void orb_extractor::compute_fast_keypoints(std::vector<std::vector<cv::KeyPoint>
                     cv::FAST(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
                              keypts_in_cell, orb_params_.min_fast_thr, true);
                 }
+		*/
 
                 if (keypts_in_cell.empty()) {
                     continue;

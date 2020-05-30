@@ -31,6 +31,9 @@ else()
     message(STATUS "Viewer for examples: None")
 endif()
 
+include_directories(/usr/local/include)
+link_directories(/usr/local/lib)
+
 # ----- Build example executables -----
 
 set(EXECUTABLE_TARGETS "")
@@ -100,7 +103,8 @@ foreach(EXECUTABLE_TARGET IN LISTS EXECUTABLE_TARGETS)
                           PRIVATE
                           ${PROJECT_NAME}
                           opencv_imgcodecs
-                          opencv_videoio)
+                          opencv_videoio
+                          opencv_xfeatures2d)
 
     # include popl and spdlog headers
     target_include_directories(${EXECUTABLE_TARGET}
