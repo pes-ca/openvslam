@@ -45,3 +45,7 @@ video/
 
 # Script
 script/
+
+# Vim swap files
+*.swp
+
