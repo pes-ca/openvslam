@@ -82,6 +82,7 @@ void orb_extractor::extract(const cv::_InputArray& in_image, const cv::_InputArr
     // build image pyramid
     compute_image_pyramid(image);
 
+    /*
     // mask initialization
     if (!mask_is_initialized_ && !orb_params_.mask_rects_.empty()) {
         create_rectangle_mask(image.cols, image.rows);
@@ -106,6 +107,10 @@ void orb_extractor::extract(const cv::_InputArray& in_image, const cv::_InputArr
         // Do not use any mask if all masks are unavailable
         compute_fast_keypoints(all_keypts, cv::Mat());
     }
+    */
+
+    std::vector<std::vector<cv::KeyPoint>> all_keypts;
+    compute_fast_keypoints(all_keypts, cv::Mat());
 
     cv::Mat descriptors;
 
