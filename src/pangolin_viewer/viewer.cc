@@ -60,6 +60,9 @@ void viewer::run() {
     pangolin::OpenGlMatrix gl_cam_pose_wc;
     gl_cam_pose_wc.SetIdentity();
 
+    std::vector<double> num_tracked_keypts_initializing;
+    std::vector<double> num_tracked_keypts_tracking;
+
     while (true) {
         // clear buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -89,8 +92,15 @@ void viewer::run() {
 
         // 2. draw the current frame image
 
-        cv::imshow(frame_viewer_name_, frame_publisher_->draw_frame());
+        unsigned int num_tracked_keypts = 0;
+        cv::imshow(frame_viewer_name_, frame_publisher_->draw_frame(num_tracked_keypts));
         cv::waitKey(interval_ms_);
+        openvslam::tracker_state_t tracking_state = frame_publisher_->get_tracking_state();
+        if (tracking_state == openvslam::tracker_state_t::Initializing) {
+            num_tracked_keypts_initializing.push_back((double)num_tracked_keypts);
+        } else if (tracking_state == openvslam::tracker_state_t::Tracking) {
+            num_tracked_keypts_tracking.push_back((double)num_tracked_keypts);
+        }
 
         // 3. state transition
 
@@ -118,6 +128,17 @@ void viewer::run() {
     system_->request_terminate();
 
     terminate();
+
+    // output number of tracked keypoints
+    std::sort(num_tracked_keypts_initializing.begin(), num_tracked_keypts_initializing.end());
+    const auto total_num_KPs_initializing = std::accumulate(num_tracked_keypts_initializing.begin(), num_tracked_keypts_initializing.end(), 0.0);
+    std::cout << "median number of KPs while initializing: " << num_tracked_keypts_initializing.at(num_tracked_keypts_initializing.size() / 2) << std::endl;
+    std::cout << "mean number of KPs while initializing: " << total_num_KPs_initializing / num_tracked_keypts_initializing.size() << std::endl;
+
+    std::sort(num_tracked_keypts_tracking.begin(), num_tracked_keypts_tracking.end());
+    const auto total_num_KPs_tracking = std::accumulate(num_tracked_keypts_tracking.begin(), num_tracked_keypts_tracking.end(), 0.0);
+    std::cout << "median number of KPs while tracking: " << num_tracked_keypts_tracking.at(num_tracked_keypts_tracking.size() / 2) << std::endl;
+    std::cout << "mean number of KPs while tracking: " << total_num_KPs_tracking / num_tracked_keypts_tracking.size() << std::endl;
 }
 
 void viewer::create_menu_panel() {

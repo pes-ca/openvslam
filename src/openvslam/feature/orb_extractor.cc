@@ -33,6 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
+#include <iostream>
+
 #include "openvslam/feature/orb_extractor.h"
 #include "openvslam/feature/orb_point_pairs.h"
 #include "openvslam/util/trigonometric.h"
@@ -82,7 +84,6 @@ void orb_extractor::extract(const cv::_InputArray& in_image, const cv::_InputArr
     // build image pyramid
     compute_image_pyramid(image);
 
-    /*
     // mask initialization
     if (!mask_is_initialized_ && !orb_params_.mask_rects_.empty()) {
         create_rectangle_mask(image.cols, image.rows);
@@ -107,10 +108,6 @@ void orb_extractor::extract(const cv::_InputArray& in_image, const cv::_InputArr
         // Do not use any mask if all masks are unavailable
         compute_fast_keypoints(all_keypts, cv::Mat());
     }
-    */
-
-    std::vector<std::vector<cv::KeyPoint>> all_keypts;
-    compute_fast_keypoints(all_keypts, cv::Mat());
 
     cv::Mat descriptors;
 
@@ -150,6 +147,7 @@ void orb_extractor::extract(const cv::_InputArray& in_image, const cv::_InputArr
 
         keypts.insert(keypts.end(), keypts_at_level.begin(), keypts_at_level.end());
     }
+    // std::cout << "NUM_KEYPTS: " << keypts.size() << std::endl;
 }
 
 unsigned int orb_extractor::get_max_num_keypoints() const {
@@ -346,22 +344,21 @@ void orb_extractor::compute_fast_keypoints(std::vector<std::vector<cv::KeyPoint>
                 }
 
                 std::vector<cv::KeyPoint> keypts_in_cell;
-
-		cv::Ptr<cv::Feature2D> features = cv::xfeatures2d::SURF::create();
-		features->detect(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
-				 keypts_in_cell);
 				
 
-		/*
                 cv::FAST(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
                          keypts_in_cell, orb_params_.ini_fast_thr_, true);
+		// cv::Ptr<cv::Feature2D> features = cv::xfeatures2d::SURF::create();
+	        // features->detect(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
+                //                  keypts_in_cell);
 
                 // Re-compute FAST keypoint with reduced threshold if enough keypoint was not got
                 if (keypts_in_cell.empty()) {
+		// double num_keypts_per_cell = (double)num_keypts_per_level_.at(level) / (double)(num_cols * num_rows);
+                // if ((int)keypts_in_cell.size() < num_keypts_per_cell * 0.1) {
                     cv::FAST(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
                              keypts_in_cell, orb_params_.min_fast_thr, true);
                 }
-		*/
 
                 if (keypts_in_cell.empty()) {
                     continue;

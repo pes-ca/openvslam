@@ -309,6 +309,14 @@ bool system::terminate_is_requested() const {
     return terminate_is_requested_;
 }
 
+tracker_state_t system::get_tracking_state() const {
+    return tracker_->tracking_state_;
+}
+
+unsigned int system::get_num_keypts() const {
+    return tracker_->curr_frm_.num_keypts_;
+}
+
 void system::check_reset_request() {
     std::lock_guard<std::mutex> lock(mtx_reset_);
     if (reset_is_requested_) {

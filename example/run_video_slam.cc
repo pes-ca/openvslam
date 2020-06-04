@@ -47,15 +47,21 @@ void mono_tracking(const std::shared_ptr<openvslam::config>& cfg,
 
     auto video = cv::VideoCapture(video_file_path, cv::CAP_FFMPEG);
     std::vector<double> track_times;
+    std::vector<double> num_keypts_initializing;
+    std::vector<double> num_keypts_tracking;
 
     cv::Mat frame;
     double timestamp = 0.0;
 
     unsigned int num_frame = 0;
 
+    const auto tp_start = std::chrono::steady_clock::now();
+    double initialization_time;
+
     bool is_not_end = true;
     // run the SLAM in another thread
     std::thread thread([&]() {
+        bool initialized = false;
         while (is_not_end) {
             is_not_end = video.read(frame);
 
@@ -68,9 +74,22 @@ void mono_tracking(const std::shared_ptr<openvslam::config>& cfg,
 
             const auto tp_2 = std::chrono::steady_clock::now();
 
+            openvslam::tracker_state_t tracking_state = SLAM.get_tracking_state();
+
+            if (!initialized && tracking_state == openvslam::tracker_state_t::Tracking) {
+                initialization_time = std::chrono::duration_cast<std::chrono::duration<double>>(tp_2 - tp_start).count();
+                initialized = true;
+            }
+
             const auto track_time = std::chrono::duration_cast<std::chrono::duration<double>>(tp_2 - tp_1).count();
             if (num_frame % frame_skip == 0) {
                 track_times.push_back(track_time);
+                const double num_keypts = SLAM.get_num_keypts();
+                if (tracking_state == openvslam::tracker_state_t::Initializing) {
+                    num_keypts_initializing.push_back(num_keypts);
+                } else if (tracking_state == openvslam::tracker_state_t::Tracking) {
+                    num_keypts_tracking.push_back(num_keypts);
+                }
             }
 
             // wait until the timestamp of the next frame
@@ -138,10 +157,26 @@ void mono_tracking(const std::shared_ptr<openvslam::config>& cfg,
         SLAM.save_map_database(map_db_path);
     }
 
+    // output initialization time
+    std::cout << "initialization time: " << initialization_time << "[s]" << std::endl;
+
+    // output tracking time
     std::sort(track_times.begin(), track_times.end());
     const auto total_track_time = std::accumulate(track_times.begin(), track_times.end(), 0.0);
     std::cout << "median tracking time: " << track_times.at(track_times.size() / 2) << "[s]" << std::endl;
     std::cout << "mean tracking time: " << total_track_time / track_times.size() << "[s]" << std::endl;
+
+    // output number of keypoints
+    // initializing
+    std::sort(num_keypts_initializing.begin(), num_keypts_initializing.end());
+    const auto total_num_keypts_initializing = std::accumulate(num_keypts_initializing.begin(), num_keypts_initializing.end(), 0.0);
+    std::cout << "median number of keypoints while initializing: " << num_keypts_initializing.at(num_keypts_initializing.size() / 2) << std::endl;
+    std::cout << "mean number of keypoints while initializing: " << total_num_keypts_initializing / num_keypts_initializing.size() << std::endl;
+    // tracking
+    std::sort(num_keypts_tracking.begin(), num_keypts_tracking.end());
+    const auto total_num_keypts_tracking = std::accumulate(num_keypts_tracking.begin(), num_keypts_tracking.end(), 0.0);
+    std::cout << "median number of keypoints while tracking: " << num_keypts_tracking.at(num_keypts_tracking.size() / 2) << std::endl;
+    std::cout << "mean number of keypoints while tracking: " << total_num_keypts_tracking / num_keypts_tracking.size() << std::endl;
 }
 
 int main(int argc, char* argv[]) {

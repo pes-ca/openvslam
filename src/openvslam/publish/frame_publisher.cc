@@ -19,7 +19,7 @@ frame_publisher::~frame_publisher() {
     spdlog::debug("DESTRUCT: publish::frame_publisher");
 }
 
-cv::Mat frame_publisher::draw_frame(const bool draw_text) {
+cv::Mat frame_publisher::draw_frame(unsigned int& num_tracked_keypts, const bool draw_text) {
     cv::Mat img;
     tracker_state_t tracking_state;
     std::vector<cv::KeyPoint> init_keypts;
@@ -78,6 +78,7 @@ cv::Mat frame_publisher::draw_frame(const bool draw_text) {
             break;
         }
     }
+    num_tracked_keypts = num_tracked;
 
     if (draw_text) {
         // draw tracking info
@@ -85,6 +86,10 @@ cv::Mat frame_publisher::draw_frame(const bool draw_text) {
     }
 
     return img;
+}
+
+tracker_state_t frame_publisher::get_tracking_state() const {
+    return tracking_state_;
 }
 
 unsigned int frame_publisher::draw_initial_points(cv::Mat& img, const std::vector<cv::KeyPoint>& init_keypts,

@@ -42,7 +42,10 @@ public:
      * Get the current image with tracking information
      * NOTE: should be accessed from viewer thread
      */
-    cv::Mat draw_frame(const bool draw_text = true);
+    cv::Mat draw_frame(unsigned int& num_tracked_keypts, const bool draw_text = true);
+
+    // Get the current tracking state
+    tracker_state_t get_tracking_state() const;
 
 protected:
     unsigned int draw_initial_points(cv::Mat& img, const std::vector<cv::KeyPoint>& init_keypts,

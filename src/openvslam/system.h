@@ -3,6 +3,7 @@
 
 #include "openvslam/type.h"
 #include "openvslam/data/bow_vocabulary.h"
+#include "openvslam/tracking_module.h"
 
 #include <string>
 #include <thread>
@@ -142,6 +143,12 @@ public:
 
     //!! Termination of the system is requested or not
     bool terminate_is_requested() const;
+
+    // Get the current tracking state
+    tracker_state_t get_tracking_state() const;
+
+    // Get the number of keypoints in the tracking module
+    unsigned int get_num_keypts() const;
 
 private:
     //! Check reset request of the system
