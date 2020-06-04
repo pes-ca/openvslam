@@ -135,10 +135,14 @@ void viewer::run() {
     std::cout << "median number of KPs while initializing: " << num_tracked_keypts_initializing.at(num_tracked_keypts_initializing.size() / 2) << std::endl;
     std::cout << "mean number of KPs while initializing: " << total_num_KPs_initializing / num_tracked_keypts_initializing.size() << std::endl;
 
-    std::sort(num_tracked_keypts_tracking.begin(), num_tracked_keypts_tracking.end());
-    const auto total_num_KPs_tracking = std::accumulate(num_tracked_keypts_tracking.begin(), num_tracked_keypts_tracking.end(), 0.0);
-    std::cout << "median number of KPs while tracking: " << num_tracked_keypts_tracking.at(num_tracked_keypts_tracking.size() / 2) << std::endl;
-    std::cout << "mean number of KPs while tracking: " << total_num_KPs_tracking / num_tracked_keypts_tracking.size() << std::endl;
+    if (!num_tracked_keypts_tracking.empty()) {
+        std::sort(num_tracked_keypts_tracking.begin(), num_tracked_keypts_tracking.end());
+        const auto total_num_KPs_tracking = std::accumulate(num_tracked_keypts_tracking.begin(), num_tracked_keypts_tracking.end(), 0.0);
+        std::cout << "median number of KPs while tracking: " << num_tracked_keypts_tracking.at(num_tracked_keypts_tracking.size() / 2) << std::endl;
+        std::cout << "mean number of KPs while tracking: " << total_num_KPs_tracking / num_tracked_keypts_tracking.size() << std::endl;
+    } else {
+        std::cout << "number of KPs while tracking: Tracking was not started" << std::endl;
+    }
 }
 
 void viewer::create_menu_panel() {

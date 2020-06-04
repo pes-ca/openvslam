@@ -97,16 +97,16 @@ void orb_extractor::extract(const cv::_InputArray& in_image, const cv::_InputArr
         // Use image_mask if it is available
         const auto image_mask = in_image_mask.getMat();
         assert(image_mask.type() == CV_8UC1);
-        compute_fast_keypoints(all_keypts, image_mask);
+        compute_keypoints(all_keypts, image_mask);
     }
     else if (!rect_mask_.empty()) {
         // Use rectangle mask if it is available and image_mask is not used
         assert(rect_mask_.type() == CV_8UC1);
-        compute_fast_keypoints(all_keypts, rect_mask_);
+        compute_keypoints(all_keypts, rect_mask_);
     }
     else {
         // Do not use any mask if all masks are unavailable
-        compute_fast_keypoints(all_keypts, cv::Mat());
+        compute_keypoints(all_keypts, cv::Mat());
     }
 
     cv::Mat descriptors;
@@ -278,7 +278,7 @@ void orb_extractor::compute_image_pyramid(const cv::Mat& image) {
     }
 }
 
-void orb_extractor::compute_fast_keypoints(std::vector<std::vector<cv::KeyPoint>>& all_keypts, const cv::Mat& mask) const {
+void orb_extractor::compute_keypoints(std::vector<std::vector<cv::KeyPoint>>& all_keypts, const cv::Mat& mask) const {
     all_keypts.resize(orb_params_.num_levels_);
 
     // An anonymous function which checks mask(image or rectangle)
@@ -335,7 +335,7 @@ void orb_extractor::compute_fast_keypoints(std::vector<std::vector<cv::KeyPoint>
                     max_x = max_border_x;
                 }
 
-                // Pass FAST computation if one of the corners of a patch is in the mask
+                // Pass computation if one of the corners of a patch is in the mask
                 if (!mask.empty()) {
                     if (is_in_mask(min_y, min_x, scale_factor) || is_in_mask(max_y, min_x, scale_factor)
                         || is_in_mask(min_y, max_x, scale_factor) || is_in_mask(max_y, max_x, scale_factor)) {

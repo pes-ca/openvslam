@@ -173,10 +173,14 @@ void mono_tracking(const std::shared_ptr<openvslam::config>& cfg,
     std::cout << "median number of keypoints while initializing: " << num_keypts_initializing.at(num_keypts_initializing.size() / 2) << std::endl;
     std::cout << "mean number of keypoints while initializing: " << total_num_keypts_initializing / num_keypts_initializing.size() << std::endl;
     // tracking
-    std::sort(num_keypts_tracking.begin(), num_keypts_tracking.end());
-    const auto total_num_keypts_tracking = std::accumulate(num_keypts_tracking.begin(), num_keypts_tracking.end(), 0.0);
-    std::cout << "median number of keypoints while tracking: " << num_keypts_tracking.at(num_keypts_tracking.size() / 2) << std::endl;
-    std::cout << "mean number of keypoints while tracking: " << total_num_keypts_tracking / num_keypts_tracking.size() << std::endl;
+    if (!num_keypts_tracking.empty()) {
+        std::sort(num_keypts_tracking.begin(), num_keypts_tracking.end());
+        const auto total_num_keypts_tracking = std::accumulate(num_keypts_tracking.begin(), num_keypts_tracking.end(), 0.0);
+        std::cout << "median number of keypoints while tracking: " << num_keypts_tracking.at(num_keypts_tracking.size() / 2) << std::endl;
+        std::cout << "mean number of keypoints while tracking: " << total_num_keypts_tracking / num_keypts_tracking.size() << std::endl;
+    } else {
+        std::cout << "number of keypoints while tracking: Tracking was not started" << std::endl;
+    }
 }
 
 int main(int argc, char* argv[]) {
