@@ -74,6 +74,9 @@ public:
     //! Image pyramid
     std::vector<cv::Mat> image_pyramid_;
 
+    //! SURF percentage
+    double reduce_rate_ = -1;
+
 private:
     //! Initialize orb extractor
     void initialize();

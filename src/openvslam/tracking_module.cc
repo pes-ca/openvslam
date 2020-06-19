@@ -638,6 +638,11 @@ void tracking_module::resume() {
     spdlog::info("resume tracking module");
 }
 
+void tracking_module::set_reduce_rate(double reduce_rate) {
+    if (extractor_left_) extractor_left_->reduce_rate_ = reduce_rate;
+    if (extractor_right_) extractor_right_->reduce_rate_ = reduce_rate;
+}
+
 bool tracking_module::check_and_execute_pause() {
     std::lock_guard<std::mutex> lock(mtx_pause_);
     if (pause_is_requested_) {

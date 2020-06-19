@@ -317,6 +317,10 @@ unsigned int system::get_num_keypts() const {
     return tracker_->curr_frm_.num_keypts_;
 }
 
+void system::set_reduce_rate(double reduce_rate) {
+    tracker_->set_reduce_rate(reduce_rate);
+}
+
 void system::check_reset_request() {
     std::lock_guard<std::mutex> lock(mtx_reset_);
     if (reset_is_requested_) {

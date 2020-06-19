@@ -345,19 +345,16 @@ void orb_extractor::compute_keypoints(std::vector<std::vector<cv::KeyPoint>>& al
 
                 std::vector<cv::KeyPoint> keypts_in_cell;
 				
-
                 cv::FAST(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
                          keypts_in_cell, orb_params_.ini_fast_thr_, true);
-		// cv::Ptr<cv::Feature2D> features = cv::xfeatures2d::SURF::create();
-	        // features->detect(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
-                //                  keypts_in_cell);
 
-                // Re-compute FAST keypoint with reduced threshold if enough keypoint was not got
-                if (keypts_in_cell.empty()) {
-		// double num_keypts_per_cell = (double)num_keypts_per_level_.at(level) / (double)(num_cols * num_rows);
-                // if ((int)keypts_in_cell.size() < num_keypts_per_cell * 0.1) {
-                    cv::FAST(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
-                             keypts_in_cell, orb_params_.min_fast_thr, true);
+		cv::Ptr<cv::Feature2D> surf_detector = cv::xfeatures2d::SURF::create();
+                double num_keypts_per_cell = (double)num_keypts_per_level_.at(level) / (num_cols * num_rows);
+                double target_num = 30.0 + num_keypts_per_cell * 500.0 * reduce_rate_;
+                std::cout << "target:" << target_num << std::endl;
+                if ((double)keypts_in_cell.size() < target_num) {
+	            surf_detector->detect(image_pyramid_.at(level).rowRange(min_y, max_y).colRange(min_x, max_x),
+                                          keypts_in_cell);
                 }
 
                 if (keypts_in_cell.empty()) {

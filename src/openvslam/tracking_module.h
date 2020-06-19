@@ -101,6 +101,9 @@ public:
     //! Resume the tracking module
     void resume();
 
+    // Set reduce rate of tracked KPs to orb extractors
+    void set_reduce_rate(double reduce_rate);
+
     //-----------------------------------------
     // variables
 

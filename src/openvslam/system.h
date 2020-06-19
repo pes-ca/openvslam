@@ -150,6 +150,9 @@ public:
     // Get the number of keypoints in the tracking module
     unsigned int get_num_keypts() const;
 
+    // Set reduce rate of tracked KPs to orb extractors in the tracking module
+    void set_reduce_rate(double reduce_rate);
+
 private:
     //! Check reset request of the system
     void check_reset_request();

@@ -62,6 +62,10 @@ void viewer::run() {
 
     std::vector<double> num_tracked_keypts_initializing;
     std::vector<double> num_tracked_keypts_tracking;
+    std::vector<double> reduce_rates;
+
+    openvslam::tracker_state_t tracking_state;
+    bool first = true;
 
     while (true) {
         // clear buffer
@@ -95,11 +99,25 @@ void viewer::run() {
         unsigned int num_tracked_keypts = 0;
         cv::imshow(frame_viewer_name_, frame_publisher_->draw_frame(num_tracked_keypts));
         cv::waitKey(interval_ms_);
-        openvslam::tracker_state_t tracking_state = frame_publisher_->get_tracking_state();
+
+
+        tracking_state = frame_publisher_->get_tracking_state();
         if (tracking_state == openvslam::tracker_state_t::Initializing) {
             num_tracked_keypts_initializing.push_back((double)num_tracked_keypts);
+            system_->set_reduce_rate(-1);
         } else if (tracking_state == openvslam::tracker_state_t::Tracking) {
             num_tracked_keypts_tracking.push_back((double)num_tracked_keypts);
+
+            double reduce_rate = 0;
+            int length = num_tracked_keypts_tracking.size();
+            double last = (length == 1) ? num_tracked_keypts : num_tracked_keypts_tracking.at(length - 2);
+            double cur = num_tracked_keypts;
+            if (((last > cur) ? last : cur) != 0) {
+                if (last > cur) reduce_rate = (last - cur) / last; 
+            }
+
+            reduce_rates.push_back(reduce_rate);
+            system_->set_reduce_rate(reduce_rate);
         }
 
         // 3. state transition
@@ -142,6 +160,15 @@ void viewer::run() {
         std::cout << "mean number of KPs while tracking: " << total_num_KPs_tracking / num_tracked_keypts_tracking.size() << std::endl;
     } else {
         std::cout << "number of KPs while tracking: Tracking was not started" << std::endl;
+    }
+    if (!reduce_rates.empty()) {
+        std::sort(reduce_rates.begin(), reduce_rates.end());
+        const auto total_reduce_rate = std::accumulate(reduce_rates.begin(), reduce_rates.end(), 0.0);
+        std::cout << "mean reduce rate: " << total_reduce_rate / reduce_rates.size() << std::endl;
+        std::cout << "max reduce rate: " << *std::max_element(reduce_rates.begin(), reduce_rates.end()) << std::endl;
+        std::cout << "min reduce rate: " << *std::min_element(reduce_rates.begin(), reduce_rates.end()) << std::endl;
+    } else {
+        std::cout << "reduce rate is not stored yet" << std::endl;
     }
 }
 
